@@ -2,20 +2,20 @@
 function initDarkMode() {
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
-    
+
     // Check for saved theme preference or use system preference
     const savedTheme = localStorage.getItem('naijashop-theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
         body.classList.add('dark-mode');
         themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     }
-    
+
     // Toggle theme when button is clicked
     themeToggle.addEventListener('click', () => {
         body.classList.toggle('dark-mode');
-        
+
         // Update icon
         if (body.classList.contains('dark-mode')) {
             themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
@@ -168,20 +168,20 @@ const products = [
 function initDarkMode() {
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
-    
+
     // Check for saved theme preference or use system preference
     const savedTheme = localStorage.getItem('naijashop-theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+
     if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
         body.classList.add('dark-mode');
         themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     }
-    
+
     // Toggle theme when button is clicked
     themeToggle.addEventListener('click', () => {
         body.classList.toggle('dark-mode');
-        
+
         // Update icon
         if (body.classList.contains('dark-mode')) {
             themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
@@ -200,16 +200,16 @@ function initSearch() {
     const searchResultsList = document.getElementById('searchResultsList');
     const resultsCount = document.getElementById('resultsCount');
 
-    searchInput.addEventListener('input', function(e) {
+    searchInput.addEventListener('input', function (e) {
         const searchTerm = e.target.value.trim().toLowerCase();
-        
+
         if (searchTerm.length === 0) {
             searchResults.classList.remove('active');
             return;
         }
 
         // Filter products based on search term
-        const filteredProducts = products.filter(product => 
+        const filteredProducts = products.filter(product =>
             product.name.toLowerCase().includes(searchTerm) ||
             product.category.toLowerCase().includes(searchTerm) ||
             product.description.toLowerCase().includes(searchTerm)
@@ -219,14 +219,14 @@ function initSearch() {
     });
 
     // Close search results when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!e.target.closest('.search-bar')) {
             searchResults.classList.remove('active');
         }
     });
 
     // Keep results open when clicking inside search bar
-    searchInput.addEventListener('click', function(e) {
+    searchInput.addEventListener('click', function (e) {
         if (this.value.trim().length > 0) {
             searchResults.classList.add('active');
         }
@@ -239,7 +239,7 @@ function displaySearchResults(products, searchTerm) {
     const searchResults = document.getElementById('searchResults');
 
     resultsCount.textContent = `${products.length} items found for "${searchTerm}"`;
-    
+
     if (products.length === 0) {
         searchResultsList.innerHTML = `
             <div class="no-results">
@@ -273,7 +273,7 @@ function displaySearchResults(products, searchTerm) {
 
     // Add click event to search result items
     document.querySelectorAll('.search-result-item').forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.preventDefault();
             const productId = this.getAttribute('data-product-id');
             const product = products.find(p => p.id == productId);
@@ -305,49 +305,49 @@ function generateStars(rating) {
 }
 
 // Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize dark mode
     initDarkMode();
-    
+
     // Initialize search functionality
     initSearch();
-    
+
     // Hero Slider
     const slides = document.querySelectorAll('.hero-slide');
     const dots = document.querySelectorAll('.hero-dot');
     let currentSlide = 0;
-    
+
     function showSlide(n) {
         slides.forEach(slide => slide.classList.remove('active'));
         dots.forEach(dot => dot.classList.remove('active'));
-        
+
         currentSlide = (n + slides.length) % slides.length;
         slides[currentSlide].classList.add('active');
         dots[currentSlide].classList.add('active');
     }
-    
+
     dots.forEach(dot => {
         dot.addEventListener('click', () => {
             showSlide(parseInt(dot.getAttribute('data-slide')));
         });
     });
-    
+
     // Auto slide every 5 seconds
     setInterval(() => {
         showSlide(currentSlide + 1);
     }, 5000);
 
-    // AI Assistant
+    // AI Assistant with Free Test API
     const aiToggle = document.getElementById('aiToggle');
     const aiChat = document.getElementById('aiChat');
     const aiMessages = document.getElementById('aiMessages');
     const aiInput = document.getElementById('aiInput');
     const aiSend = document.getElementById('aiSend');
-    
+
     aiToggle.addEventListener('click', () => {
         aiChat.classList.toggle('active');
     });
-    
+
     function addMessage(text, isUser = false) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message');
@@ -356,60 +356,445 @@ document.addEventListener('DOMContentLoaded', function() {
         aiMessages.appendChild(messageDiv);
         aiMessages.scrollTop = aiMessages.scrollHeight;
     }
-    
+
+    function addTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('message', 'ai', 'typing');
+        typingDiv.id = 'typing-indicator';
+        typingDiv.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+        aiMessages.appendChild(typingDiv);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
     aiSend.addEventListener('click', sendMessage);
     aiInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
-    
-    function sendMessage() {
+
+    async function sendMessage() {
         const message = aiInput.value.trim();
         if (message) {
             addMessage(message, true);
             aiInput.value = '';
-            
-            // Simulate AI response after a short delay
-            setTimeout(() => {
-                const responses = [
-                    "I found several products matching your request. Would you like me to show them?",
-                    "Based on your budget, I recommend these options...",
-                    "That product is currently on sale! Would you like to see similar items?",
-                    "I can help you compare prices from different sellers. What's your budget range?",
-                    "Great choice! This product has excellent reviews. Would you like me to track the price for you?"
-                ];
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                addMessage(randomResponse);
-            }, 1000);
+            aiSend.disabled = true;
+
+            addTypingIndicator();
+
+            try {
+                // Using a free public API for testing
+                const response = await fetch('https://api.quotable.io/random');
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const data = await response.json();
+                const aiResponse = `I understand you asked about shopping, but while I'm setting up, here's an interesting quote: "${data.content}" - ${data.author}`;
+
+                removeTypingIndicator();
+                addMessage(aiResponse);
+
+            } catch (error) {
+                console.error('Error:', error);
+                removeTypingIndicator();
+
+                // Fallback to smart responses based on user input
+                const userMessage = message.toLowerCase();
+                let response = "Thanks for your message! I'm currently in testing mode.";
+
+                if (userMessage.includes('price') || userMessage.includes('cost')) {
+                    response = "I can help you compare prices! In the full version, I'll check current prices across multiple sellers.";
+                } else if (userMessage.includes('product') || userMessage.includes('item')) {
+                    response = "I can help you find products! Tell me what you're looking for and I'll search our catalog.";
+                } else if (userMessage.includes('shipping') || userMessage.includes('delivery')) {
+                    response = "Shipping usually takes 3-5 business days. Express delivery is available for an additional fee.";
+                } else if (userMessage.includes('return') || userMessage.includes('refund')) {
+                    response = "We have a 30-day return policy. Items must be in original condition with tags attached.";
+                }
+
+                addMessage(response);
+            } finally {
+                aiSend.disabled = false;
+            }
         }
     }
 
-    // Add to Cart functionality
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-    const cartCount = document.querySelector('.cart-count');
-    let count = 0;
-    
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            count++;
-            cartCount.textContent = count;
-            
-            // Animation effect
-            button.textContent = 'Added!';
-            button.style.backgroundColor = '#4CAF50';
-            
-            setTimeout(() => {
-                button.textContent = 'Add to Cart';
-                button.style.backgroundColor = '';
-            }, 1500);
-        });
+    // Add welcome message when chat opens
+    aiToggle.addEventListener('click', function () {
+        if (aiChat.classList.contains('active') && aiMessages.children.length === 0) {
+            addMessage("Hello! I'm your AI shopping assistant (Demo Mode). I can help you with product searches, price comparisons, and shopping questions. What would you like to know?");
+        }
     });
+
+    // // AI Assistant
+    // const aiToggle = document.getElementById('aiToggle');
+    // const aiChat = document.getElementById('aiChat');
+    // const aiMessages = document.getElementById('aiMessages');
+    // const aiInput = document.getElementById('aiInput');
+    // const aiSend = document.getElementById('aiSend');
+
+    // aiToggle.addEventListener('click', () => {
+    //     aiChat.classList.toggle('active');
+    // });
+
+    // function addMessage(text, isUser = false) {
+    //     const messageDiv = document.createElement('div');
+    //     messageDiv.classList.add('message');
+    //     messageDiv.classList.add(isUser ? 'user' : 'ai');
+    //     messageDiv.textContent = text;
+    //     aiMessages.appendChild(messageDiv);
+    //     aiMessages.scrollTop = aiMessages.scrollHeight;
+    // }
+
+    // aiSend.addEventListener('click', sendMessage);
+    // aiInput.addEventListener('keypress', (e) => {
+    //     if (e.key === 'Enter') {
+    //         sendMessage();
+    //     }
+    // });
+
+    // function sendMessage() {
+    //     const message = aiInput.value.trim();
+    //     if (message) {
+    //         addMessage(message, true);
+    //         aiInput.value = '';
+
+    //         // Simulate AI response after a short delay
+    //         setTimeout(() => {
+    //             const responses = [
+    //                 "I found several products matching your request. Would you like me to show them?",
+    //                 "Based on your budget, I recommend these options...",
+    //                 "That product is currently on sale! Would you like to see similar items?",
+    //                 "I can help you compare prices from different sellers. What's your budget range?",
+    //                 "Great choice! This product has excellent reviews. Would you like me to track the price for you?"
+    //             ];
+    //             const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    //             addMessage(randomResponse);
+    //         }, 1000);
+    //     }
+    // }
+
+
+    // Homepage functionality
+class Homepage {
+    constructor() {
+        this.cart = new Cart();
+        this.init();
+    }
+
+    init() {
+        this.setupAddToCartButtons();
+        this.setupCartIcon();
+        this.setupSearch();
+        this.setupHeroSlider();
+        this.setupTheme();
+        this.updateCartCount();
+    }
+
+    setupAddToCartButtons() {
+        const addToCartButtons = document.querySelectorAll('.add-to-cart');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const product = this.getProductData(button);
+                this.cart.addItem(product);
+                this.updateCartCount();
+                this.showAddToCartToast(product.name);
+            });
+        });
+    }
+
+    getProductData(button) {
+        const productCard = button.closest('.product-card');
+        const productName = productCard.querySelector('.product-name').textContent.trim();
+        const priceElement = productCard.querySelector('.product-price');
+        
+        // Extract price (handle both discounted and regular prices)
+        let priceText = priceElement.textContent;
+        const originalPriceElement = productCard.querySelector('.product-original-price');
+        
+        if (originalPriceElement) {
+            // Use the discounted price (the one without line-through)
+            priceText = priceElement.textContent.replace(originalPriceElement.textContent, '').trim();
+        }
+        
+        const price = this.extractPrice(priceText);
+        const image = productCard.querySelector('.product-image').src;
+        
+        // Generate consistent ID based on product name
+        const id = 'prod_' + productName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+        return {
+            id: id,
+            name: productName,
+            price: price,
+            image: image,
+            category: this.getCategoryFromProduct(productName)
+        };
+    }
+
+    extractPrice(priceText) {
+        // Remove currency symbol and commas, then convert to number
+        const cleanPrice = priceText.replace(/[^\d.]/g, '');
+        return parseFloat(cleanPrice);
+    }
+
+    getCategoryFromProduct(productName) {
+        const name = productName.toLowerCase();
+        if (name.includes('phone') || name.includes('tecno') || name.includes('infinix')) return 'Phones & Tablets';
+        if (name.includes('watch') || name.includes('smartwatch')) return 'Smart Watches';
+        if (name.includes('camera')) return 'Cameras';
+        if (name.includes('headphone')) return 'Headphones';
+        if (name.includes('sneaker') || name.includes('nike')) return 'Sneakers';
+        if (name.includes('laptop') || name.includes('backpack')) return 'Computers';
+        if (name.includes('playstation') || name.includes('gaming')) return 'Gaming';
+        return 'General';
+    }
+
+    setupCartIcon() {
+        const cartIcon = document.getElementById('cartIcon');
+        if (cartIcon) {
+            cartIcon.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'carts.html';
+            });
+        }
+    }
+
+    updateCartCount() {
+        const cartCount = document.querySelector('.cart-count');
+        if (cartCount) {
+            const totalItems = this.cart.getTotalItems();
+            cartCount.textContent = totalItems;
+            cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+        }
+    }
+
+    showAddToCartToast(productName) {
+        let toast = document.getElementById('addToCartToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'addToCartToast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(100px);
+                background: var(--primary);
+                color: white;
+                padding: 12px 20px;
+                border-radius: var(--radius);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                opacity: 0;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 500;
+            `;
+            document.body.appendChild(toast);
+        }
+
+        toast.innerHTML = `<i class="fas fa-check-circle"></i> ✓ ${productName} added to cart`;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(100px)';
+        }, 2000);
+    }
+
+    setupSearch() {
+        const searchInput = document.querySelector('.search-bar input');
+        const searchResults = document.getElementById('searchResults');
+        
+        if (searchInput && searchResults) {
+            searchInput.addEventListener('focus', () => {
+                searchResults.classList.add('active');
+            });
+            
+            searchInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    searchResults.classList.remove('active');
+                }, 200);
+            });
+            
+            searchInput.addEventListener('input', (e) => {
+                this.handleSearch(e.target.value);
+            });
+        }
+    }
+
+    handleSearch(query) {
+        // Search functionality can be implemented here
+        console.log('Searching for:', query);
+    }
+
+    setupHeroSlider() {
+        const slides = document.querySelectorAll('.hero-slide');
+        const dots = document.querySelectorAll('.hero-dot');
+        let currentSlide = 0;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            slides[n].classList.add('active');
+            dots[n].classList.add('active');
+        }
+
+        // Auto slide every 5 seconds
+        setInterval(() => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }, 5000);
+
+        // Dot click events
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                showSlide(currentSlide);
+            });
+        });
+    }
+
+    setupTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        if (!themeToggle) return;
+
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Set initial theme
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
+            document.body.classList.add('dark-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+    }
+}
+
+// Cart class used by both pages
+class Cart {
+    constructor() {
+        this.items = this.loadCart();
+    }
+
+    loadCart() {
+        const savedCart = localStorage.getItem('naijashop_cart');
+        return savedCart ? JSON.parse(savedCart) : [];
+    }
+
+    saveCart() {
+        localStorage.setItem('naijashop_cart', JSON.stringify(this.items));
+    }
+
+    addItem(product) {
+        const existingItem = this.items.find(item => item.id === product.id);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            this.items.push({
+                ...product,
+                quantity: 1
+            });
+        }
+        
+        this.saveCart();
+        return this.items;
+    }
+
+    removeItem(productId) {
+        this.items = this.items.filter(item => item.id !== productId);
+        this.saveCart();
+        return this.items;
+    }
+
+    updateQuantity(productId, newQuantity) {
+        if (newQuantity <= 0) {
+            return this.removeItem(productId);
+        }
+
+        const item = this.items.find(item => item.id === productId);
+        if (item) {
+            item.quantity = newQuantity;
+            this.saveCart();
+        }
+        return this.items;
+    }
+
+    getTotalItems() {
+        return this.items.reduce((count, item) => count + item.quantity, 0);
+    }
+
+    calculateSubtotal() {
+        return this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    }
+
+    calculateShipping() {
+        const subtotal = this.calculateSubtotal();
+        return subtotal >= 10000 ? 0 : 1000;
+    }
+
+    calculateTotal() {
+        return this.calculateSubtotal() + this.calculateShipping();
+    }
+
+    clearCart() {
+        this.items = [];
+        this.saveCart();
+        return this.items;
+    }
+}
+
+// Initialize homepage when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.homepage = new Homepage();
+});
+
+// Make cart accessible globally
+window.Cart = Cart;
+
+    // // Add to Cart functionality
+    // const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    // const cartCount = document.querySelector('.cart-count');
+    // let count = 0;
+
+    // addToCartButtons.forEach(button => {
+    //     button.addEventListener('click', () => {
+    //         count++;
+    //         cartCount.textContent = count;
+
+    //         // Animation effect
+    //         button.textContent = 'Added!';
+    //         button.style.backgroundColor = '#4CAF50';
+
+    //         setTimeout(() => {
+    //             button.textContent = 'Add to Cart';
+    //             button.style.backgroundColor = '';
+    //         }, 1500);
+    //     });
+    // });
 
     // Mobile menu toggle
     const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     const navActions = document.querySelector('.nav-actions');
-    
+
     mobileMenuToggle.addEventListener('click', () => {
         navActions.classList.toggle('show');
     });
@@ -423,30 +808,30 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize dark mode
     initDarkMode();
-    
+
     // Hero Slider
     const slides = document.querySelectorAll('.hero-slide');
     const dots = document.querySelectorAll('.hero-dot');
     let currentSlide = 0;
-    
+
     function showSlide(n) {
         slides.forEach(slide => slide.classList.remove('active'));
         dots.forEach(dot => dot.classList.remove('active'));
-        
+
         currentSlide = (n + slides.length) % slides.length;
         slides[currentSlide].classList.add('active');
         dots[currentSlide].classList.add('active');
     }
-    
+
     dots.forEach(dot => {
         dot.addEventListener('click', () => {
             showSlide(parseInt(dot.getAttribute('data-slide')));
         });
     });
-    
+
     // Auto slide every 5 seconds
     setInterval(() => {
         showSlide(currentSlide + 1);
@@ -458,11 +843,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // const aiMessages = document.getElementById('aiMessages');
     // const aiInput = document.getElementById('aiInput');
     // const aiSend = document.getElementById('aiSend');
-    
+
     // aiToggle.addEventListener('click', () => {
     //     aiChat.classList.toggle('active');
     // });
-    
+
     function addMessage(text, isUser = false) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message');
@@ -471,25 +856,25 @@ document.addEventListener('DOMContentLoaded', function() {
         aiMessages.appendChild(messageDiv);
         aiMessages.scrollTop = aiMessages.scrollHeight;
     }
-    
+
     aiSend.addEventListener('click', sendMessage);
     aiInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
-    
+
     function sendMessage() {
         const message = aiInput.value.trim();
         if (message) {
             addMessage(message, true);
             aiInput.value = '';
-            
+
             // Simulate AI response after a short delay
             setTimeout(() => {
                 const responses = [
-                    "I found several products matching your request. Would you like me to show them?",
-                    "Based on your budget, I recommend these options...",
+                    "Bia dont disturb me no try am NEVER?",
+                    "Based on your budget, I recommend that you make money before coming here ",
                     "That product is currently on sale! Would you like to see similar items?",
                     "I can help you compare prices from different sellers. What's your budget range?",
                     "Great choice! This product has excellent reviews. Would you like me to track the price for you?"
@@ -504,16 +889,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const addToCartButtons = document.querySelectorAll('.add-to-cart');
     const cartCount = document.querySelector('.cart-count');
     let count = 0;
-    
+
     addToCartButtons.forEach(button => {
         button.addEventListener('click', () => {
             count++;
             cartCount.textContent = count;
-            
+
             // Animation effect
             button.textContent = 'Added!';
             button.style.backgroundColor = '#4CAF50';
-            
+
             setTimeout(() => {
                 button.textContent = 'Add to Cart';
                 button.style.backgroundColor = '';
@@ -524,7 +909,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu toggle
     const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     const navActions = document.querySelector('.nav-actions');
-    
+
     mobileMenuToggle.addEventListener('click', () => {
         navActions.classList.toggle('show');
     });
